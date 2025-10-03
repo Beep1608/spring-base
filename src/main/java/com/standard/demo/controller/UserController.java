@@ -1,15 +1,13 @@
 package com.standard.demo.controller;
 
+import com.standard.demo.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.standard.demo.dto.UserDTO;
 import com.standard.demo.service.UserService;
 
 @RestController
@@ -21,14 +19,16 @@ public class UserController {
 
 
     @GetMapping("/login")
-    public ResponseEntity<String> getUser(){
+    public ResponseEntity<String> login(@RequestBody User user){
 
-        Authentication auth =  SecurityContextHolder.getContext().getAuthentication();
+        return new ResponseEntity<String>("Token: "+service.login(user), HttpStatus.OK);
+    }
 
-        if(auth == null){
-            return new ResponseEntity<>("No existe usuario", HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>("Usuario: "+auth.getName(), HttpStatus.OK);
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@RequestBody User user){
+
+        String jwtToken = service.register(user);
+        return  ResponseEntity.ok(jwtToken);
     }
 
 }

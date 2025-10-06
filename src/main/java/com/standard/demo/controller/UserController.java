@@ -19,7 +19,7 @@ public class UserController {
 
 
     @GetMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User user){
+    public ResponseEntity<String> login(Authentication user){
 
         return new ResponseEntity<String>("Token: "+service.login(user), HttpStatus.OK);
     }

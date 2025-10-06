@@ -31,6 +31,7 @@ dependencies {
 	//implementation("org.springframework.boot:spring-boot-starter-data-rest")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-web")
+	//implementation("spring-boot-starter-oauth2-authorization-server")
 	//implementation("org.springframework.session:spring-session-jdbc")
 	implementation("org.modelmapper:modelmapper:3.2.4")
 
@@ -42,6 +43,7 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+
 
 
 	compileOnly("org.projectlombok:lombok")

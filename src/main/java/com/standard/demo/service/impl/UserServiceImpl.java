@@ -1,5 +1,6 @@
 package com.standard.demo.service.impl;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -99,9 +100,15 @@ public class UserServiceImpl implements UserService {
      }
 
     @Override
-    public String login(User user){
+    public String login(Authentication user){
 
-        return jwtService.generateToken(user.getName(),user.getPassword());
+        org.springframework.security.core.userdetails.User userDetail =
+                (org.springframework.security.core.userdetails.User) user.getPrincipal();
+        System.out.println("Info:  "+ userDetail.getUsername());
+        System.out.println("Info : "+ userDetail.getPassword());
+
+        return jwtService.generateToken(user.getName(),"1235");
     }
+
 
 }

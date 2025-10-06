@@ -104,8 +104,6 @@ public class UserServiceImpl implements UserService {
 
         org.springframework.security.core.userdetails.User userDetail =
                 (org.springframework.security.core.userdetails.User) user.getPrincipal();
-        System.out.println("Info:  "+ userDetail.getUsername());
-        System.out.println("Info : "+ userDetail.getPassword());
 
         return jwtService.generateToken(user.getName(),"1235");
     }

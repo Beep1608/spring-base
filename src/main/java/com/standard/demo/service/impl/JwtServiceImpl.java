@@ -11,16 +11,14 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -64,6 +62,7 @@ public class JwtServiceImpl implements JwtService {
         System.out.println("Expiration UTC: " + expirationUTC);
         System.out.println("Issued At " + zone + ": " + issuedAtLocal);
         System.out.println("Expiration " + zone + ": " + expirationLocal);
+
         return Jwts
                 .builder()
                 .claims()
@@ -72,7 +71,7 @@ public class JwtServiceImpl implements JwtService {
                 .issuedAt(issuedAt)
                 .expiration(expiration)
                 .and()
-                .signWith(getKey())
+                .signWith(getKey(), Jwts.SIG.HS256)
                 .compact();
     }
 

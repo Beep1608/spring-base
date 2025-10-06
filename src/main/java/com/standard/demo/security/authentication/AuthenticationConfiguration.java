@@ -1,6 +1,7 @@
 package com.standard.demo.security.authentication;
 
-import com.standard.demo.security.authentication.filter.JwtFilter;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -33,8 +35,6 @@ import java.security.interfaces.RSAPublicKey;
 @EnableWebSecurity
 public class AuthenticationConfiguration {
 
-    @Autowired
-    private JwtFilter jwtFilter;
 
     @Value("${jwt.secret}")
     private String secretKeyString;
@@ -49,10 +49,9 @@ public class AuthenticationConfiguration {
         .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/api/user/login","/api/user/register").permitAll()
             .anyRequest().authenticated() 
-        ) //.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                //.oauth2ResourceServer(oath2 ->
-                //        oath2.jwt(Customizer.withDefaults())
-                //)
+        )
+             .oauth2ResourceServer((oauth2) -> oauth2
+                  .jwt(Customizer.withDefaults()))
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults());
 
@@ -64,7 +63,6 @@ public class AuthenticationConfiguration {
     @Bean
     public AuthenticationManager authenticationManager(DaoAuthenticationProvider authProvider, JwtAuthenticationProvider jwtAuthenticationProvider) throws Exception{
             ProviderManager providerManager =  new ProviderManager(authProvider, jwtAuthenticationProvider);
-            providerManager.setEraseCredentialsAfterAuthentication(false);
             return providerManager;
     }
 
@@ -78,7 +76,6 @@ public class AuthenticationConfiguration {
     }
 
     //Provider for JWT
-
     @Bean
    JwtAuthenticationProvider jwtAuthenticationProvider(JwtDecoder decoder){
       return new JwtAuthenticationProvider(decoder);
@@ -88,9 +85,9 @@ public class AuthenticationConfiguration {
     @Bean
     public JwtDecoder jwtDecoder()  {
 
-        SecretKeySpec secretKeySpec = new SecretKeySpec(secretKeyString.getBytes(), "HmacSHA256");
+        SecretKey key  = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKeyString));
         return NimbusJwtDecoder
-                .withSecretKey(secretKeySpec)
+                .withSecretKey(key)
                 .macAlgorithm(MacAlgorithm.HS256)
                 .build();
     }

@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import com.standard.demo.dto.UserDTO;
 
 
-public interface  UserService extends UserDetailsService {
+public interface  UserService {
     
     public Optional<UserDTO> findById(Long id);
     public Optional<UserDTO> findByName(String name);

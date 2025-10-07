@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 @Entity
 @Table(name="users")
 @Data
@@ -13,11 +16,18 @@ import lombok.NoArgsConstructor;
 public class User {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "username", length = 50)
+    private String username;
 
-    private String name;
-
+    @Column(name = "password", length = 500)
     private String password;
+
+    private boolean enabled;
+
+    @OneToMany(mappedBy = "user")
+    private Collection<Authority> authorities = new HashSet<>();
+
+
+
 
 }

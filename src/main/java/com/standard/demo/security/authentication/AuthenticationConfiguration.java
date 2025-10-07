@@ -20,11 +20,15 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import javax.sql.DataSource;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -50,9 +54,12 @@ public class AuthenticationConfiguration {
                 .requestMatchers("/api/user/login","/api/user/register").permitAll()
             .anyRequest().authenticated() 
         )
-             .oauth2ResourceServer((oauth2) -> oauth2
-                  .jwt(Customizer.withDefaults()))
-                .formLogin(Customizer.withDefaults())
+             //  .securityContext(securityContex ->{
+             //      securityContex.securityContextRepository(new HttpSessionSecurityContextRepository());
+             //  })
+            .oauth2ResourceServer((oauth2) -> oauth2
+                 .jwt(Customizer.withDefaults()))
+                //.formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults());
 
         var obj = http.build();
@@ -60,20 +67,27 @@ public class AuthenticationConfiguration {
         return obj;
     }
 
+
     @Bean
-    public AuthenticationManager authenticationManager(DaoAuthenticationProvider authProvider, JwtAuthenticationProvider jwtAuthenticationProvider) throws Exception{
-            ProviderManager providerManager =  new ProviderManager(authProvider, jwtAuthenticationProvider);
+    UserDetailsManager userDetailsManager(DataSource dataSource){
+        return new JdbcUserDetailsManager(dataSource);
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager( DaoAuthenticationProvider daoAuthenticationProvider,JwtAuthenticationProvider jwtAuthenticationProvider) throws Exception{
+            ProviderManager providerManager =  new ProviderManager( daoAuthenticationProvider,jwtAuthenticationProvider);
             return providerManager;
     }
 
     //Provider for username/password
-    @Bean 
-    public DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService, PasswordEncoder encoder){
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
-        provider.setPasswordEncoder(encoder);
+     @Bean
+     public DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService, PasswordEncoder encoder){
+         System.out.println("UserDetailService : " + userDetailsService.getClass());
+         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+         provider.setPasswordEncoder(encoder);
 
-        return provider;
-    }
+         return provider;
+     }
 
     //Provider for JWT
     @Bean

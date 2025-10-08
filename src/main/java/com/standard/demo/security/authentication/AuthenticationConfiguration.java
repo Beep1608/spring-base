@@ -2,10 +2,13 @@ package com.standard.demo.security.authentication;
 
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -18,22 +21,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import javax.sql.DataSource;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
+import java.util.List;
+
 
 @Configuration
 @EnableWebSecurity
@@ -44,28 +42,44 @@ public class AuthenticationConfiguration {
     private String secretKeyString;
 
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
 
-        System.out.println("Rquest :");
+
+    //BasicAuth Chain
+
+    @Bean
+    public SecurityFilterChain basiAuthChain(HttpSecurity http) throws Exception{
+
         http
-        .csrf(csrf ->csrf.disable())
-        .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/api/user/login","/api/user/register").permitAll()
-            .anyRequest().authenticated() 
-        )
-             //  .securityContext(securityContex ->{
-             //      securityContex.securityContextRepository(new HttpSessionSecurityContextRepository());
-             //  })
-            .oauth2ResourceServer((oauth2) -> oauth2
-                 .jwt(Customizer.withDefaults()))
-                //.formLogin(Customizer.withDefaults())
+                .securityMatcher("/login","/register")
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll()
+                )
                 .httpBasic(Customizer.withDefaults());
 
         var obj = http.build();
         obj.getFilters().stream().forEach(filter -> System.out.println("Filter :"+filter.getClass()));
         return obj;
     }
+
+    //JWT Chain
+
+    @Bean
+    public SecurityFilterChain jwtChain(HttpSecurity http) throws Exception{
+
+        http
+                .securityMatcher("/**")
+                .authorizeHttpRequests(authorize -> authorize
+                        .anyRequest().authenticated()
+                )
+                .oauth2ResourceServer((oauth2) -> oauth2
+                        .jwt(Customizer.withDefaults()));
+
+        var obj = http.build();
+        obj.getFilters().stream().forEach(filter -> System.out.println("Filter :"+filter.getClass()));
+        return obj;
+    }
+
+
 
 
     @Bean
@@ -82,7 +96,6 @@ public class AuthenticationConfiguration {
     //Provider for username/password
      @Bean
      public DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService, PasswordEncoder encoder){
-         System.out.println("UserDetailService : " + userDetailsService.getClass());
          DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
          provider.setPasswordEncoder(encoder);
 

@@ -86,7 +86,6 @@ public class UserServiceImpl implements UserService {
 
          Authority authority = new Authority();
          authority.setAuthority("User");
-         authority.setUser(newUser);
          authorityRepository.save(authority);
 
 

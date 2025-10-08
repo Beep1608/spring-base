@@ -24,8 +24,8 @@ public class User {
 
     private boolean enabled;
 
-    @OneToMany(mappedBy = "user")
-    private Collection<Authority> authorities = new HashSet<>();
+    //@OneToMany(mappedBy = "user")
+    //private Collection<Authority> authorities = new HashSet<>();
 
 
 

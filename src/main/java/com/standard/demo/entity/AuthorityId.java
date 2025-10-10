@@ -4,14 +4,14 @@ import java.io.Serializable;
 
 public class AuthorityId implements Serializable {
 
-    private Long id;
-    private String  authority;
+	private String user;
+	private String authority;
 
-    public AuthorityId() {}
+	public AuthorityId() {}
 
-    public AuthorityId(Long id, String authority) {
-        this.id = id;
-        this.authority = authority;
-    }
+	public AuthorityId(String user, String authority) {
+		this.user = user;
+		this.authority = authority;
+	}
 
 }

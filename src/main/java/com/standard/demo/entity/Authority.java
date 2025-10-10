@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "authorities", uniqueConstraints = {
     @UniqueConstraint(columnNames = {
-            "authority"
+			"username","authority"
     })
 })
 @IdClass(AuthorityId.class)
@@ -17,11 +17,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Authority {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(name = "authority", length = 50)
-    private String authority;
+	@Id
+	@JoinColumn(name = "username",referencedColumnName = "username")
+	@ManyToOne
+	private User user;
+
+	@Id
+	@Column(name = "authority", length = 50)
+	private String authority;
+
 
 
 }

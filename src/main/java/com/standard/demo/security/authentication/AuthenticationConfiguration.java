@@ -26,6 +26,7 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import javax.crypto.SecretKey;
@@ -38,97 +39,102 @@ import java.util.List;
 public class AuthenticationConfiguration {
 
 
-    @Value("${jwt.secret}")
-    private String secretKeyString;
+	@Value("${jwt.secret}")
+	private String secretKeyString;
 
 
 
 
-    //BasicAuth Chain
+	//BasicAuth Chain
 
-    @Bean
-    public SecurityFilterChain basiAuthChain(HttpSecurity http) throws Exception{
+	@Bean
+	public SecurityFilterChain basiAuthChain(HttpSecurity http) throws Exception{
 
-        http
-                .securityMatcher("/login","/register")
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
-                )
-                .httpBasic(Customizer.withDefaults());
+		http
+				//.csrf((csrf) -> csrf.disable())
+				.csrf(csrf ->{
+					csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+							.ignoringRequestMatchers("/users/register");
+				})
+				.securityMatcher("/users/login","/users/register")
+				.authorizeHttpRequests(auth -> auth
+						.anyRequest().permitAll()
+				)
+				.httpBasic(Customizer.withDefaults());
 
-        var obj = http.build();
-        obj.getFilters().stream().forEach(filter -> System.out.println("Filter :"+filter.getClass()));
-        return obj;
-    }
+		var obj = http.build();
+		obj.getFilters().stream().forEach(filter -> System.out.println("Filter :"+filter.getClass()));
+		return obj;
+	}
 
-    //JWT Chain
+	//JWT Chain
 
-    @Bean
-    public SecurityFilterChain jwtChain(HttpSecurity http) throws Exception{
+	@Bean
+	public SecurityFilterChain jwtChain(HttpSecurity http) throws Exception{
 
-        http
-                .securityMatcher("/**")
-                .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().authenticated()
-                )
-                .oauth2ResourceServer((oauth2) -> oauth2
-                        .jwt(Customizer.withDefaults()));
+		http
+				.securityMatcher("/api/**")
+				.authorizeHttpRequests(authorize -> authorize
+						.anyRequest().authenticated()
+				)
+				.oauth2ResourceServer((oauth2) -> oauth2
+						.jwt(Customizer.withDefaults()));
 
-        var obj = http.build();
-        obj.getFilters().stream().forEach(filter -> System.out.println("Filter :"+filter.getClass()));
-        return obj;
-    }
-
-
-
-
-    @Bean
-    UserDetailsManager userDetailsManager(DataSource dataSource){
-        return new JdbcUserDetailsManager(dataSource);
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager( DaoAuthenticationProvider daoAuthenticationProvider,JwtAuthenticationProvider jwtAuthenticationProvider) throws Exception{
-            ProviderManager providerManager =  new ProviderManager( daoAuthenticationProvider,jwtAuthenticationProvider);
-            return providerManager;
-    }
-
-    //Provider for username/password
-     @Bean
-     public DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService, PasswordEncoder encoder){
-         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
-         provider.setPasswordEncoder(encoder);
-
-         return provider;
-     }
-
-    //Provider for JWT
-    @Bean
-   JwtAuthenticationProvider jwtAuthenticationProvider(JwtDecoder decoder){
-      return new JwtAuthenticationProvider(decoder);
-   }
-
-
-    @Bean
-    public JwtDecoder jwtDecoder()  {
-
-        SecretKey key  = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKeyString));
-        return NimbusJwtDecoder
-                .withSecretKey(key)
-                .macAlgorithm(MacAlgorithm.HS256)
-                .build();
-    }
-
-
-
-    @Bean
-    PasswordEncoder encoder(){
-        return new BCryptPasswordEncoder();
-    }
+		var obj = http.build();
+		obj.getFilters().stream().forEach(filter -> System.out.println("Filter :"+filter.getClass()));
+		return obj;
+	}
 
 
 
 
-    
-    
+	@Bean
+	UserDetailsManager userDetailsManager(DataSource dataSource){
+		return new JdbcUserDetailsManager(dataSource);
+	}
+
+	@Bean
+	public AuthenticationManager authenticationManager( DaoAuthenticationProvider daoAuthenticationProvider,JwtAuthenticationProvider jwtAuthenticationProvider) throws Exception{
+		ProviderManager providerManager =  new ProviderManager( daoAuthenticationProvider,jwtAuthenticationProvider);
+		return providerManager;
+	}
+
+	//Provider for username/password
+	@Bean
+	public DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService, PasswordEncoder encoder){
+		DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+		provider.setPasswordEncoder(encoder);
+
+		return provider;
+	}
+
+	//Provider for JWT
+	@Bean
+	JwtAuthenticationProvider jwtAuthenticationProvider(JwtDecoder decoder){
+		return new JwtAuthenticationProvider(decoder);
+	}
+
+
+	@Bean
+	public JwtDecoder jwtDecoder()  {
+
+		SecretKey key  = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKeyString));
+		return NimbusJwtDecoder
+				.withSecretKey(key)
+				.macAlgorithm(MacAlgorithm.HS256)
+				.build();
+	}
+
+
+
+	@Bean
+	PasswordEncoder encoder(){
+		return new BCryptPasswordEncoder();
+	}
+
+
+
+
+
+
 }

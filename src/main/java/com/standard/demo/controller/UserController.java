@@ -10,24 +10,27 @@ import org.springframework.web.bind.annotation.*;
 
 import com.standard.demo.service.UserService;
 
+
 @RestController
+@RequestMapping("/users")
 public class UserController {
-    
-    @Autowired
-    private  UserService service = new UserServiceImpl();
+
+	@Autowired
+	private  UserService service = new UserServiceImpl();
 
 
-    @GetMapping("/login")
-    public ResponseEntity<String> login(Authentication user){
+	@GetMapping("/login")
+	public ResponseEntity<String> login(Authentication user){
 
-        return new ResponseEntity<String>("Token: "+service.login(user), HttpStatus.OK);
-    }
+		System.out.println("Intentando loggear user");
+		return new ResponseEntity<String>("Token: "+service.login(user), HttpStatus.OK);
+	}
 
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody User user){
-        System.out.println("MIAAAU");
-        String jwtToken = service.register(user);
-        return  ResponseEntity.ok(jwtToken);
-    }
+	@PostMapping("/register")
+	public ResponseEntity<String> register(@RequestBody User user){
+		System.out.println("MIAAAU");
+		String jwtToken = service.register(user);
+		return  ResponseEntity.ok(jwtToken);
+	}
 
 }

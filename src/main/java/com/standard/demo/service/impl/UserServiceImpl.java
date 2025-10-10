@@ -77,24 +77,25 @@ public class UserServiceImpl implements UserService {
 
 
 
-     @Override
-     public String register(User user){
+	@Override
+	public String register(User user){
 
-        user.setPassword(encoder.encode(user.getPassword()));
-        user.setEnabled(true);
-        User newUser =  repository.save(user);
+		user.setPassword(encoder.encode(user.getPassword()));
+		user.setEnabled(true);
+		User newUser =  repository.save(user);
 
-         Authority authority = new Authority();
-         authority.setAuthority("User");
-         authorityRepository.save(authority);
-
-
-         System.out.println("User credentials crypt: "+ user.getPassword());
+		Authority authority = new Authority();
+		authority.setAuthority("User");
+		authority.setUser(newUser);
+		authorityRepository.save(authority);
 
 
+		System.out.println("User credentials crypt: "+ user.getPassword());
 
-        return jwtService.generateToken(newUser.getUsername(),newUser.getPassword());
-     }
+
+
+		return jwtService.generateToken(newUser.getUsername(),newUser.getPassword());
+	}
 
     @Override
     public String login(Authentication user){

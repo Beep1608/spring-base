@@ -36,12 +36,16 @@ dependencies {
 	//implementation("org.springframework.session:spring-session-jdbc")
 	implementation("org.modelmapper:modelmapper:3.2.4")
 
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
+
+
     // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
     // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
+
 
 
 

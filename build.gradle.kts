@@ -67,8 +67,8 @@ tasks.withType<Test> {
 	useJUnitPlatform()
 	
     // Excluir una clase específica
-    exclude("**/DemoApplicationTests.class")
-
-    // Excluir múltiples clases o patrones
-    exclude("**/SomeOtherTest*.class")
+    //exclude("**/DemoApplicationTests.class")
+//
+    //// Excluir múltiples clases o patrones
+    //exclude("**/SomeOtherTest*.class")
 }

@@ -11,7 +11,7 @@ public class GreetingController {
     public String greeting(){
         return "Hola Spring";
     }
-    @GetMapping("/miau")
+    @GetMapping("/api/miau")
     public String miau(){
         return "Miau";
     }

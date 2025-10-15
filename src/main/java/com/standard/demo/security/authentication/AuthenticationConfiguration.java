@@ -18,8 +18,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
@@ -31,6 +34,10 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import javax.crypto.SecretKey;
 import javax.sql.DataSource;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 
 
@@ -119,10 +126,16 @@ public class AuthenticationConfiguration {
 	public JwtDecoder jwtDecoder()  {
 
 		SecretKey key  = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKeyString));
-		return NimbusJwtDecoder
+		JwtTimestampValidator validator = new JwtTimestampValidator();
+		Clock clock = Clock.system(ZoneId.of("America/Mexico_City"));
+		validator.setClock(clock);
+
+		NimbusJwtDecoder decoder = NimbusJwtDecoder
 				.withSecretKey(key)
 				.macAlgorithm(MacAlgorithm.HS256)
 				.build();
+		decoder.setJwtValidator(validator);
+		return decoder;
 	}
 
 
